@@ -1,0 +1,26 @@
+[
+    {
+        "title": "CPC: Essentials of Temporary Injunction (Order 39, Rule 1 & 2)",
+        "content": "To secure a stay order, you must argue the 'Three Ingredients':\n1. Prima Facie Case: You have an arguable right.\n2. Balance of Convenience: The inconvenience to you if denied outweighs the defendant's.\n3. Irreparable Loss: Monetary compensation won't suffice. \n\n*Tip*: Always draft separate paragraphs for each ingredient in your application."
+    },
+    {
+        "title": "CrPC: Pre-Arrest Bail (Section 498)",
+        "content": "Pre-arrest bail is an extraordinary remedy. The key ground is 'Mala Fide' (bad faith) on the part of the complainant or police. You must show the FIR was lodged to humiliate or blackmail.\n\n*Tip*: Cite the landmark *Hidayat Ullah Khan* case (PLD 1949 Lahore 21) on mala fide."
+    },
+    {
+        "title": "Drafting: The 'Framing of Issues' Strategy",
+        "content": "Issues are the roadmap of the trial. If a factual dispute isn't an 'Issue', you can't lead evidence on it.\n\n*Tip*: Before evidence begins, review the Issues framed by the Judge. If a key defense point is missing, file an application under Order 14 Rule 5 CPC to amend issues immediately."
+    },
+    {
+        "title": "Evidence: The Best Evidence Rule (Article 72-74 QSO)",
+        "content": "Documents must be proved by primary evidence (the original). Secondary evidence (copies) is only admissible if the original is lost/destroyed (Art 76).\n\n*Tip*: Never rely on photocopies alone. If the original is with the other party, serve a 'Notice to Produce' (Order 11 Rule 15 CPC) first."
+    },
+    {
+        "title": "Litigation: The 'Stay Order' Expiry Trap",
+        "content": "In many High Courts, a stay order granted 'ad-interim' lasts only for a specific period (e.g., 6 months per C.P.LA 2011 SC). \n\n*Tip*: Don't assume the stay continues. Always file an application for extension BEFORE it expires, or your client may face demolition/arrest."
+    },
+    {
+        "title": "Argument: Distinguishing Precedent",
+        "content": "When the other side cites a Supreme Court judgment against you, don't ignore it. 'Distinguish' it on facts.\n\n*Tip*: Argument: 'My Lord, the ratio in that case applied because X fact existed. In our case, X is absent, thus the precedent does not bind this court.'"
+    }
+]

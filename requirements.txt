@@ -1,0 +1,9 @@
+slack_sdk
+feedparser
+feedparser
+apscheduler
+beautifulsoup4
+requests
+python-dotenv
+lxml_html_clean
+fpdf2
