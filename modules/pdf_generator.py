@@ -3,117 +3,222 @@ from datetime import datetime
 import os
 import re
 
-# --- COLORS ---
-# Navy Blue: #2C3E50 -> (44, 62, 80)
-# Emerald Green: #27AE60 -> (39, 174, 96)
-# Gray Text: #7F8C8D -> (127, 140, 141)
-# Black Text: #2C3E50 (Dark Blue-Black)
+# --- COLORS (From Stitch Design) ---
+COLOR_PRIMARY = (26, 54, 93)      # Deep Navy Blue
+COLOR_ACCENT = (185, 28, 28)      # Deep Crimson
+COLOR_TEXT_DARK = (15, 23, 42)    # Slate 900
+COLOR_TEXT_GRAY = (100, 116, 139) # Slate 500
+COLOR_BG_LIGHT = (255, 255, 255)
 
-class PDF(FPDF):
+class NewspaperPDF(FPDF):
     def header(self):
-        # Top Bar
-        self.set_fill_color(44, 62, 80) # Navy
-        self.rect(0, 0, 210, 20, 'F')
+        # 1. Top Metadata Bar (Vol | Date | Edition)
+        self.set_y(10)
+        self.set_font('Helvetica', 'I', 12)
+        self.set_text_color(*COLOR_TEXT_GRAY)
         
-        # Title
-        self.set_y(5)
-        self.set_font('Helvetica', 'B', 20)
-        self.set_text_color(255, 255, 255)
-        self.cell(0, 10, 'Morning Edition', 0, 1, 'C')
+        # Calculate width for 3 distinct parts
+        page_width = self.w - 20
+        col_width = page_width / 3
         
-        # Subtitle / Date
-        self.set_font('Helvetica', 'I', 10)
-        self.set_text_color(200, 200, 200) # Light Gray
-        date_str = datetime.now().strftime("%A, %B %d, %Y")
-        self.cell(0, 5, f'Daily Knowledge Digest | {date_str}', 0, 1, 'C')
+        # Vol No (Left)
+        self.cell(col_width, 5, 'VOL. CXXIV ... No. 58,402', 0, 0, 'L')
+        # Date (Center)
+        date_str = datetime.now().strftime("%A, %B %d, %Y").upper()
+        self.cell(col_width, 5, date_str, 0, 0, 'C')
+        # Edition (Right)
+        self.cell(col_width, 5, 'LONDON & NEW YORK EDITION', 0, 1, 'R')
         
-        self.ln(10)
+        # 2. Main Title
+        self.ln(2)
+        self.set_font('Times', 'B', 36)
+        self.set_text_color(*COLOR_PRIMARY)
+        self.cell(0, 15, 'Daily Law, Politics & Tech Journal', 0, 1, 'C')
+        
+        # 3. Horizontal Separator (Double Line style)
+        self.ln(2)
+        self.set_draw_color(*COLOR_TEXT_DARK)
+        self.set_line_width(0.6)
+        self.line(10, self.get_y(), 200, self.get_y())
+        self.ln(1)
+        self.set_line_width(0.3)
+        self.line(10, self.get_y(), 200, self.get_y())
+        self.ln(5)
 
     def footer(self):
-        self.set_y(-15)
-        self.set_font('Helvetica', 'I', 8)
-        self.set_text_color(127, 140, 141)
-        self.cell(0, 10, f'Curated by Antigravity Bot | Page {self.page_no()}', 0, 0, 'C')
+        # No footer as requested
+        pass
 
     def chapter_title(self, label):
-        # Section Header with colored background strip
-        self.set_font('Helvetica', 'B', 14)
-        self.set_text_color(44, 62, 80) # Navy
-        self.cell(0, 8, label, 0, 1, 'L')
+        # Section Header
+        self.set_font('Times', 'B', 16)
+        self.set_text_color(*COLOR_ACCENT)
+        self.cell(0, 8, label.upper(), 0, 1, 'L')
         
-        # Underline
-        self.set_draw_color(39, 174, 96) # Green Accent
-        self.set_line_width(0.5)
-        self.line(10, self.get_y(), 200, self.get_y())
-        self.ln(4)
+        # Decorative underscore
+        self.set_draw_color(*COLOR_ACCENT)
+        self.set_line_width(1)
+        self.line(10, self.get_y(), 60, self.get_y()) # Short line
+        self.ln(5)
 
-    def chapter_body(self, body):
-        self.set_font('Arial', '', 11)
-        self.set_text_color(50, 50, 50)
+    def write_styled_text(self, text):
+        """
+        Parses text for *bold* markers and writes it accordingly.
+        Respects the CURRENT font family/size/style but toggles Bold.
+        """
+        # Save current font state
+        current_font = self.font_family
+        current_style = self.font_style
+        current_size = self.font_size_pt
         
-        # Parse Slack-style links <url|text> and render
-        # We split by the regex pattern to get chunks of (text, url)
-        # Pattern: <(http[^|]+)\|([^>]+)>
-        parts = re.split(r'<([^|]+)\|([^>]+)>', body)
+        # Split by *bold* markers: "Normal *Bold* Normal" -> ['Normal ', 'Bold', ' Normal']
+        parts = re.split(r'\*([^*]+)\*', text)
         
-        # Starting content
         for i, part in enumerate(parts):
-            if i == 0:
-                # Normal text
-                self.write(6, clean_text_for_pdf(part))
-            elif i % 3 == 0:
-                # This is normal text after a link
-                self.write(6, clean_text_for_pdf(part))
-            elif i % 3 == 2:
-                # This is the LINK TEXT (captured in group 2)
-                # The previous part (i-1) was the URL (group 1)
-                url = parts[i-1]
-                link_text = part
+            if not part: continue
+            
+            if i % 2 == 1:
+                # Odd indices are the captured bold text.
+                # Logic: Toggle BOLD. 
+                # If current style has 'B', remove it (Regular).
+                # If current style lacks 'B', add it (Bold).
                 
-                # Render Link
-                self.set_text_color(39, 174, 96) # Green Link
-                self.set_font('', 'U')
-                self.write(6, clean_text_for_pdf(link_text), link=url)
+                new_style = current_style
+                if 'B' in current_style:
+                    new_style = new_style.replace('B', '')
+                else:
+                    new_style += 'B'
                 
-                # Reset
-                self.set_text_color(50, 50, 50)
-                self.set_font('', '')
+                self.set_font(current_font, new_style, current_size)
+                self.write(5, part)
+                # Revert
+                self.set_font(current_font, current_style, current_size)
+            else:
+                # Even indices are normal text (keep current style)
+                self.set_font(current_font, current_style, current_size)
+                self.write(5, part)
+
+    def article_content(self, title, body):
+        # Headline
+        self.set_font('Times', 'B', 14)
+        self.set_text_color(*COLOR_TEXT_DARK)
+        self.multi_cell(0, 6, clean_text_for_pdf(title))
+        self.ln(2)
+
+        # Body Text
+        self.set_font('Times', '', 11)
+        self.set_text_color(30, 30, 30)
         
-        self.ln(8)
+        # 1. Parse content into lines first
+        lines = body.split('\n')
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Check if line behaves like a title
+            is_headline = False
+            if re.match(r'^\d+\.', line) or line.startswith('*') or line.startswith('#'):
+                is_headline = True
+                
+            if is_headline:
+                self.ln(4) # Extra space before new item
+                self.set_font('Times', 'B', 12)
+                self.set_text_color(*COLOR_PRIMARY)
+            else:
+                self.set_font('Times', '', 11)
+                self.set_text_color(30, 30, 30)
+
+            # 2. Process Links within the line
+            parts = re.split(r'<([^|]+)\|([^>]+)>', line)
+            
+            for i, part in enumerate(parts):
+                text_part = clean_text_for_pdf(part)
+                if not text_part: continue
+
+                if i % 3 == 0:
+                    # Normal text (or the text before a link) which might contain *bold*
+                    self.write_styled_text(text_part)
+                elif i % 3 == 2:
+                    # Link Text
+                    url = parts[i-1] 
+                    
+                    # Style Link
+                    current_font = self.font_family
+                    current_style = self.font_style
+                    current_size = self.font_size_pt
+                    current_color = self.text_color
+                    
+                    self.set_text_color(*COLOR_ACCENT)
+                    self.set_font('', 'U')
+                    
+                    # Links shouldn't have bold markers usually.
+                    self.write(5, text_part, link=url)
+                    
+                    # Reset style
+                    self.set_text_color(current_color.r, current_color.g, current_color.b)
+                    self.set_font(current_font, current_style, current_size)
+            
+            self.ln(6) # New line after each paragraph/item
+            
+            # If it was a summary paragraph (not a headline), add extra blank line
+            if not is_headline:
+                self.ln(2)
 
 def clean_text_for_pdf(text):
     if not text: return ""
-    # Replace common markdown bold ** with nothing or handle formatted logic later
-    text = text.replace('**', '').replace('*', '') 
-    return text.encode('latin-1', 'ignore').decode('latin-1')
+    # Standardize quotes and dashes for Latin-1
+    replacements = {
+        '‘': "'", '’': "'", '“': '"', '”': '"', '–': '-', '—': '-',
+        '…': '...', '\u2022': '*', '**': ''
+    }
+    for k, v in replacements.items():
+        text = text.replace(k, v)
+    
+    return text.encode('latin-1', 'replace').decode('latin-1')
 
 def generate_daily_pdf(ai_report, learning_item=None):
-    pdf = PDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf = NewspaperPDF()
+    pdf.set_auto_page_break(auto=True, margin=20)
+    pdf.set_margins(10, 10, 10)
     pdf.add_page()
     
-    # 1. Main News Content
-    for category, content in ai_report.items():
-        pdf.chapter_title(clean_text_for_pdf(category.upper()))
-        pdf.chapter_body(content)
+    # Mapping Config Keys (with emojis) to Clean PDF Titles
+    # Usage: { ConfigKeySubstring: DisplayTitle }
+    SECTION_MAPPING = {
+        "International Law": "International News",
+        "International Relations": "International Relations", 
+        "National": "National & Political (Pakistan)",
+        "Tech": "Tech & Innovation"
+    }
 
-    # 2. Learning Content (Styled Box)
-    if learning_item:
-        pdf.ln(5)
-        pdf.set_fill_color(235, 245, 238) # Very Light Green
-        pdf.rect(10, pdf.get_y(), 190, 40, 'F')
-        
-        pdf.set_xy(15, pdf.get_y() + 5)
-        pdf.set_font('Helvetica', 'B', 12)
-        pdf.set_text_color(39, 174, 96)
-        pdf.cell(0, 6, "LEARNING CORNER: " + clean_text_for_pdf(learning_item.get('title', '')), 0, 1)
-        
-        pdf.set_x(15)
-        pdf.set_font('Arial', 'I', 11)
-        pdf.set_text_color(60, 60, 60)
-        pdf.multi_cell(180, 6, clean_text_for_pdf(learning_item.get('content', '')))
+    # Normalize input keys for flexible matching
+    # Create a lookup: { CleanedKeySubstring: Content }
+    content_map = {}
+    for k, v in ai_report.items():
+        # Remove emojis and whitespace for safer matching
+        clean_key = re.sub(r'[^\w\s&]', '', k).strip() 
+        content_map[clean_key] = v
+        # Also map the raw key just in case
+        content_map[k] = v
 
-    # Save
+    # Iterate through our desired order
+    for match_string, display_title in SECTION_MAPPING.items():
+        # Find content that contains the match_string
+        found_content = None
+        
+        # 1. Try exact match in normalized map key
+        for actual_key, content in ai_report.items():
+            if match_string in actual_key:
+                found_content = content
+                break
+        
+        if found_content:
+            pdf.chapter_title(clean_text_for_pdf(display_title))
+            pdf.article_content(f"Latest Developments in {display_title}", found_content)
+
+    # Save logic remains same...
     base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(base_path, 'data')
     if not os.path.exists(data_dir):
@@ -124,7 +229,7 @@ def generate_daily_pdf(ai_report, learning_item=None):
     
     try:
         pdf.output(filepath)
-        print(f"  > Premium PDF Generated: {filepath}")
+        print(f"  > Newspaper PDF Generated: {filepath}")
         return filepath
     except Exception as e:
         print(f"  > Error generating PDF: {e}")
