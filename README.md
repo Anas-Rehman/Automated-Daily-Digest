@@ -17,41 +17,53 @@
 
 ## 🚀 Overview
 
-**News Bot** is a sophisticated, AI-driven automation tool designed to curb information overload. It autonomously scrapes high-value RSS feeds—ranging from International Law and Global Politics to Frontier Tech—and synthesizes them into a crisp, readable daily digest.
+**News Bot** is a sophisticated, AI-driven automation tool designed to curb information overload. It autonomously scrapes high-value RSS feeds—ranging from International Law and Global Politics to Frontier Tech—and synthesizes them into two premium outputs each morning:
+1.  A **Visual PDF Newspaper** ("The Morning Edition") for offline reading.
+2.  A **Slack Digest** for quick team synchronization.
 
-By leveraging **LLMs (Large Language Models)** and advanced filtering logic, it separates signal from noise, delivering only what matters to your Slack workspace every single day.
+By leveraging **LLMs (Large Language Models)** and advanced filtering logic, it separates signal from noise, delivering deep, research-grade analysis rather than just headlines.
 
 ## <a name="features"></a>✨ Features
 
 | Feature | Description |
 |:---:|:---|
-| **🤖 AI-Curation** | Intelligent filtering and summarization using advanced NLP to prioritize high-impact stories. |
-| **🌍 Global Scope** | Monitors 20+ sources including *Foreign Policy, Reuters, Dawn, Jurist, and TechCrunch*. |
-| **⚖️ specialized Intelligence** | Dedicated modules for **International Law** and **International Relations**. |
-
-| **📅 Cron Scheduling** | Runs automatically at **12:00 PM** (configurable) to match your morning routine. |
-| **💬 Beautiful Output** | Formatted Slack messages with blocks, dividers, and emojis for superior readability. |
+| **📄 PDF Newspaper** | Automatically generates a professionally styled `"Morning Edition"` PDF with headlines, summaries, and "Concept of the Day". |
+| **🤖 AI-Curation** | Uses **Qwen** & **Mistral** to generate dense, analytical (3-paragraph) executive summaries of complex topics. |
+| **🎓 Learning Engine** | Dynamically serves a daily **Legal/Political Concept** (e.g., *Stare Decisis, Realpolitik*) from a curated knowledge base. |
+| **🌍 Global Scope** | Monitors high-impact sources including *Foreign Policy, Reuters, Dawn, Jurist, and TechCrunch*. |
+| **⚖️ specialized Intelligence** | Dedicated modules for **International Law**, **International Relations**, and **National Security**. |
+| **📅 Automated Delivery** | Runs automatically at **12:00 PM** (configurable) via Github Actions or local cron. |
 
 ## <a name="architecture"></a>🛠️ Architecture
 
-The system operates on a linear extraction-transformation-load (ETL) pipeline reinforced by AI agents.
+The system operates on an enhanced ETL pipeline reinforced by AI agents and a document generation layer.
 
 ```mermaid
 graph TD
     A["⏰ Scheduler (12:00 PM)"] -->|Trigger| B("🚀 Main Process")
+    
     subgraph "Data Ingestion"
         B -->|Fetch| C{"RSS Feeds"}
+        B -->|Load| L["Legal Tips DB 📚"]
         C -->|Law| D["Raw Data"]
         C -->|Politics| D
-        C -->|Tech| D
     end
+    
     subgraph "Intelligence Layer"
         D -->|Filter| E["Analyst Agent 🕵️"]
-        E -->|Summarize| F["Content Engine 🧠"]
+        E -->|Summarize & Expand| F["AI Content Engine 🧠"]
+        F -->|Generate| G["Full Report"]
     end
+    
+    subgraph "Production"
+        G -->|Layout| P["PDF Generator 📄"]
+        P -->|Create| PDF["Morning_Edition.pdf"]
+        G -->|Format| S["Slack Composer 💬"]
+    end
+    
     subgraph "Delivery"
-        F -->|Format| H["Slack Client 💬"]
-        H -->|Push| I(("Your Slack Channel"))
+        S -->|Push| Slack(("Slack Channel"))
+        PDF -->|Upload| Slack
     end
 ```
 
@@ -62,15 +74,19 @@ graph TD
 ├── 📂 .github
 │   └── 📂 workflows
 │       └── daily_digest.yml   # 🤖 GitHub Actions Automation
-├── 📂 data                    # 💾 Local storage for state/cache
+├── 📂 data                    # 💾 Local storage (Legal Tips, PDF cache)
+│   ├── legal_tips.json        # 🎓 Source for "Concept of the Day"
+│   └── *.pdf                  # 📄 Generated newspapers
 ├── 📂 modules                 # 🧠 Core Logic
-│   ├── ai_handler.py          # LLM Integration
-│   ├── analyst.py             # Content Filtering
-│   ├── news_fetcher.py        # RSS Parsing
-│   ├── slack_bot.py           # Slack API Client
+│   ├── ai_handler.py          # LLM Integration (Bytez API)
+│   ├── learning_engine.py     # Educational Content Manager
+│   ├── news_fetcher.py        # RSS Parsing & Filtering
+│   ├── pdf_generator.py       # FPDF2 Newspaper Layout Engine
+│   ├── slack_bot.py           # Slack API Client (Block Kit)
 │   └── ...
 ├── config.py                  # ⚙️ Configuration & Feed Lists
-├── main.py                    # 🚀 Entry Point
+├── main.py                    # 🚀 Scheduler Entry Point
+├── run_now.py                 # ⚡ Manual Trigger Script
 └── requirements.txt           # 📦 Dependencies
 ```
 
@@ -79,6 +95,7 @@ graph TD
 ### Prerequisites
 - **Python 3.9+**
 - A **Slack Workspace** with permissions to create Apps.
+- (Optional) **Bytez API Key** for AI summarization.
 
 ### 1. Clone the Repository
 ```bash
@@ -113,8 +130,9 @@ touch .env
 ```ini
 # .env
 SLACK_BOT_TOKEN=xoxb-your-bot-token
-SLACK_CHANNEL_ID=C12345678  # Channel ID where messages will be sent
-BYTEZ_API_KEY=your-llm-api-key # Optional: If using external LLM services
+SLACK_APP_TOKEN=xapp-your-app-token # (Optional, depending on socket mode)
+SLACK_CHANNEL_ID=C12345678
+BYTEZ_API_KEY=your-llm-api-key 
 ```
 
 3. **Customize Feeds**:
@@ -128,14 +146,20 @@ BYTEZ_API_KEY=your-llm-api-key # Optional: If using external LLM services
 
 ## <a name="usage"></a>🕹️ Usage
 
-### Run Manually
-To test the bot immediately:
+### 🚀 Manual Trigger (Instant Run)
+To run the full pipeline immediately (bypass scheduler):
+```bash
+python run_now.py
+```
+*This will fetch news, generate the PDF, and send it to Slack instantly.*
+
+### ⏰ Scheduler Mode
+To start the bot in background mode (waiting for 12:00 PM):
 ```bash
 python main.py
 ```
-*The bot will start the scheduler. To force a run instantly, check `run_now.py` (if available) or modify the schedule.*
 
-### Run via GitHub Actions ☁️
+### ☁️ Run via GitHub Actions
 This repository includes a pre-configured workflow in `.github/workflows/daily_digest.yml`.
 
 1. Go to your repo **Settings** > **Secrets and variables** > **Actions**.
