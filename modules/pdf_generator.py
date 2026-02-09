@@ -21,19 +21,18 @@ class NewspaperPDF(FPDF):
         page_width = self.w - 20
         col_width = page_width / 3
         
-        # Vol No (Left)
-        self.cell(col_width, 5, 'VOL. CXXIV ... No. 58,402', 0, 0, 'L')
+        
         # Date (Center)
         date_str = datetime.now().strftime("%A, %B %d, %Y").upper()
         self.cell(col_width, 5, date_str, 0, 0, 'C')
         # Edition (Right)
-        self.cell(col_width, 5, 'LONDON & NEW YORK EDITION', 0, 1, 'R')
+        self.cell(col_width, 5, 'GLOBAL EDITION', 0, 1, 'R')
         
         # 2. Main Title
         self.ln(2)
         self.set_font('Times', 'B', 36)
         self.set_text_color(*COLOR_PRIMARY)
-        self.cell(0, 15, 'Daily Law, Politics & Tech Journal', 0, 1, 'C')
+        self.cell(0, 15, 'Law, Politics & Tech Journal', 0, 1, 'C')
         
         # 3. Horizontal Separator (Double Line style)
         self.ln(2)
