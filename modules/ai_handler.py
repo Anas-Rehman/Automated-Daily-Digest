@@ -40,35 +40,42 @@ def generate_section_summary(category, articles):
     news_content = ""
     for idx, article in enumerate(articles[:20]): 
         news_content += f"{idx+1}. {article['title']} - {article['link']}\n"
+prompt = f"""
+ROLE: Senior Intelligence Analyst & Research Director.
+SECTION: {category}
 
-    prompt = f"""
-    ROLE: Senior Intelligence Analyst & Research Director.
-    SECTION: {category}
-    
-    Task: Produce a COMPREHENSIVE RESEARCH PAPER based on the raw data below. 
-    1.  **EXTREME DEPTH**: Do not summarize. Expand. Provide history, context, geopolitical implications, and future outlooks for every major story. Be comprehensove, detailed etc.
-    2.  **FORMAT**: Write in full, detailed paragraphs. Not just bullet points. 
-    3.  **CITATIONS**: Embed links naturally in the text. 
-        -   Start of sentence: "According to <URL|The New York Times>, ..."
-        -   End of sentence: "...as reported by <URL|Reuters>."
-    
-    CRITICAL INSTRUCTION: 
-    - Output MUST be detailed and long. No "bitesized" content.
-    - Do NOT output your internal "<think>" process. 
-    - Output ONLY the final response.
-    
-    BEAUTY & FORMATTING GUIDE (Strict Slack Syntax):
-    1.  **Headers**: Use emojis. No H1/H2 tags.
-    2.  **Bold**: Use SINGLE asterisks (*), NOT double (**). 
-    3.  **Links**: Use Slack syntax: <URL|Source Name>. 
-        - Correct: <https://example.com|Read Source>
-        - Wrong: [Read Source](https://example.com)
-        - Wrong: https://example.com
-    
-    RAW DATA:
-    {news_content}
-    """
+Task: Produce a HIGH-DENSITY Daily Intelligence Digest based on the raw data below.
 
+1.  **STRATEGY - "BITE-SIZED BUT EXHAUSTIVE"**:
+    -   **Conciseness**: Do not write long essays. Use tight, economical language.
+    -   **Completeness**: You must capture EVERY major argument, conflicting viewpoint, and geopolitical implication. 
+    -   **Density**: No fluff or filler words. Every sentence must deliver a new fact, argument, or insight.
+
+2.  **STRUCTURE**: 
+    -   Write in punchy, high-impact paragraphs.
+    -   **The Argument**: Explicitly state the conflict (e.g., "Proponents argue X, while critics warn of Y").
+    -   **The Context**: Briefly cite the history or precedent without rambling.
+
+3.  **CITATIONS**: Embed links naturally in the text.
+    -   Start: "Per <URL|The New York Times>, ..."
+    -   End: "...(via <URL|Reuters>)."
+
+BEAUTY & FORMATTING GUIDE (Strict Slack Syntax):
+1.  **Headers**: Use emojis. No H1/H2 tags (#).
+2.  **Bold**: Use SINGLE asterisks (*), NOT double (**). 
+3.  **Links**: Use strict Slack syntax: <URL|Source Name>. 
+    -   Correct: <https://example.com|Read Source>
+    -   Wrong: [Read Source](https://example.com)
+    -   Wrong: https://example.com
+
+CRITICAL OUTPUT RULES:
+-   Output MUST be dense. Maximum information in minimum space.
+-   Do NOT output your internal "<think>" process.
+-   Output ONLY the final response.
+
+RAW DATA:
+{news_content}
+"""
     # 2. Call Bytez API
     MODELS = [
         "Qwen/Qwen3-4B-Thinking-2507",
