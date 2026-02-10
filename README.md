@@ -28,7 +28,7 @@ By leveraging **LLMs (Large Language Models)** and advanced filtering logic, it 
 | Feature | Description |
 |:---:|:---|
 | **📄 PDF Newspaper** | Automatically generates a professionally styled `"Morning Edition"` PDF with headlines, summaries, and "Concept of the Day". |
-| **🤖 AI-Curation** | Uses **Qwen** & **Mistral** to generate dense, analytical (3-paragraph) executive summaries of complex topics. |
+| **🤖 AI-Curation** | Uses **Artificial Intelligence** to generate dense, analytical (3-paragraph) executive summaries of complex topics. |
 | **🎓 Learning Engine** | Dynamically serves a daily **Legal/Political Concept** (e.g., *Stare Decisis, Realpolitik*) from a curated knowledge base. |
 | **🌍 Global Scope** | Monitors high-impact sources including *Foreign Policy, Reuters, Dawn, Jurist, and TechCrunch*. |
 | **⚖️ specialized Intelligence** | Dedicated modules for **International Law**, **International Relations**, and **National Security**. |
