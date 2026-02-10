@@ -1,19 +1,28 @@
 import os
 import requests
 import json
-from config import BYTEZ_API_KEY
 import time
-
 import re
+# Ensure you have a config.py file with BYTEZ_API_KEY defined, 
+# or replace this import with your actual key string.
+try:
+    from config import BYTEZ_API_KEY
+except ImportError:
+    BYTEZ_API_KEY = "YOUR_API_KEY_HERE"
 
 def strip_thinking(text):
+    """
+    Removes internal monologue (<think> tags) and separates content 
+    from headers/metadata.
+    """
+    if not text:
+        return ""
+
     # 0. Aggressive <think> cleanup
     if '</think>' in text:
         text = text.split('</think>')[-1].strip()
 
-    """
-    Extracts content after the '--- CUT HERE ---' separator.
-    """
+    # Extracts content after the '--- CUT HERE ---' separator.
     separator = "--- CUT HERE ---"
     if separator in text:
         parts = text.split(separator)
@@ -34,13 +43,18 @@ def strip_thinking(text):
     return text.strip()
 
 def generate_section_summary(category, articles):
-    if not articles: return None
+    if not articles: 
+        return None
 
     # 1. Prepare Content
     news_content = ""
     for idx, article in enumerate(articles[:20]): 
-        news_content += f"{idx+1}. {article['title']} - {article['link']}\n"
-prompt = f"""
+        # Safety: Escape curly braces in titles to prevent f-string errors
+        title = article['title'].replace('{', '{{').replace('}', '}}')
+        link = article['link'].replace('{', '{{').replace('}', '}}')
+        news_content += f"{idx+1}. {title} - {link}\n"
+
+    prompt = f"""
 ROLE: Senior Intelligence Analyst & Research Director.
 SECTION: {category}
 
@@ -76,6 +90,7 @@ CRITICAL OUTPUT RULES:
 RAW DATA:
 {news_content}
 """
+
     # 2. Call Bytez API
     MODELS = [
         "Qwen/Qwen3-4B-Thinking-2507",
@@ -126,11 +141,7 @@ RAW DATA:
                         # 1. Extract Main Content
                         raw_output = data["output"]["content"]
                         
-                        # 2. Check for Reasoning Fields (and ignore them)
-                        # Some models return 'reasoning_content' or separate 'reasoning'
-                        # We only want 'content'.
-                        
-                        # 3. Apply Strip Logic (Safety Net)
+                        # 2. Apply Strip Logic (Safety Net)
                         return strip_thinking(raw_output)
                     else:
                         print(f"  > Empty output from {model}. Moving to next model...")
