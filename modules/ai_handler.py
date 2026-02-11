@@ -61,7 +61,7 @@ SECTION: {category}
 Task: Produce a HIGH-DENSITY Daily Intelligence Digest based on the raw data below.
 
 1.  **STRATEGY - "BITE-SIZED BUT EXHAUSTIVE"**:
-    -   **Conciseness**: Do not write long essays. Use tight, economical language.
+    -   Explain in detail and cover every story
     -   **Completeness**: You must capture EVERY major argument, conflicting viewpoint, and geopolitical implication. 
     -   **Density**: No fluff or filler words. Every sentence must deliver a new fact, argument, or insight.
 
