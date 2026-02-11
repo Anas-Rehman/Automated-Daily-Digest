@@ -93,11 +93,12 @@ RAW DATA:
 
     # 2. Call Bytez API
     MODELS = [
+        "anthropic/claude-opus-4-6" ,
+        "Qwen/Qwen3-8B" , 
         "Qwen/Qwen3-4B-Thinking-2507",
         "mistralai/Mistral-7B-Instruct-v0.3",
         "anthropic/claude-opus-4-5", 
         "openai/gpt-oss-20b" ,
-        "Qwen/Qwen3-8B" ,
         "meta-llama/Meta-Llama-3.1-8B-Instruct"
     ]
 
