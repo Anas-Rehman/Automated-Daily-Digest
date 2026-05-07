@@ -28,5 +28,5 @@ jobs:
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-        BYTEZ_API_KEY: ${{ secrets.BYTEZ_API_KEY }}
+        MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
       run: python run_now.py

@@ -78,7 +78,7 @@ graph TD
 │   ├── legal_tips.json        # 🎓 Source for "Concept of the Day"
 │   └── *.pdf                  # 📄 Generated newspapers
 ├── 📂 modules                 # 🧠 Core Logic
-│   ├── ai_handler.py          # LLM Integration (Bytez API)
+│   ├── ai_handler.py          # LLM Integration (Mistral API)
 │   ├── learning_engine.py     # Educational Content Manager
 │   ├── news_fetcher.py        # RSS Parsing & Filtering
 │   ├── pdf_generator.py       # FPDF2 Newspaper Layout Engine
@@ -95,7 +95,7 @@ graph TD
 ### Prerequisites
 - **Python 3.9+**
 - A **Slack Workspace** with permissions to create Apps.
-- (Optional) **Bytez API Key** for AI summarization.
+- (Optional) **Mistral API Key** for AI summarization.
 
 ### 1. Clone the Repository
 ```bash
@@ -132,7 +132,7 @@ touch .env
 SLACK_BOT_TOKEN=xoxb-your-bot-token
 SLACK_APP_TOKEN=xapp-your-app-token # (Optional, depending on socket mode)
 SLACK_CHANNEL_ID=C12345678
-BYTEZ_API_KEY=your-llm-api-key 
+MISTRAL_API_KEY=your-llm-api-key 
 ```
 
 3. **Customize Feeds**:
@@ -166,7 +166,7 @@ This repository includes a pre-configured workflow in `.github/workflows/daily_d
 2. Add the following Repository Secrets:
    - `SLACK_BOT_TOKEN`
    - `SLACK_CHANNEL_ID`
-   - `BYTEZ_API_KEY`
+   - `MISTRAL_API_KEY`
 3. The workflow runs automatically at **07:00 UTC** (12:00 PM Pakistan Time).
 
 
