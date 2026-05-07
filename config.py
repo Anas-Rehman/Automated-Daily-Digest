@@ -7,7 +7,7 @@ load_dotenv()
 # Slack Configuration
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.environ.get("SLACK_CHANNEL_ID") # Variable name in code is APP_TOKEN but maps to Channel ID
-BYTEZ_API_KEY = os.environ.get("BYTEZ_API_KEY")
+MISTRAL_API_KEY = os.environ.get("MISTRAL_API_KEY")
 
 # -------------------------------------------------------------------------
 # S O U R C E   L I S T

@@ -3,12 +3,12 @@ import requests
 import json
 import time
 import re
-# Ensure you have a config.py file with BYTEZ_API_KEY defined, 
+# Ensure you have a config.py file with MISTRAL_API_KEY defined, 
 # or replace this import with your actual key string.
 try:
-    from config import BYTEZ_API_KEY
+    from config import MISTRAL_API_KEY
 except ImportError:
-    BYTEZ_API_KEY = "YOUR_API_KEY_HERE"
+    MISTRAL_API_KEY = "YOUR_API_KEY_HERE"
 
 def strip_thinking(text):
     """
@@ -91,82 +91,71 @@ RAW DATA:
 {news_content}
 """
 
-    # 2. Call Bytez API
-    MODELS = [
-        "anthropic/claude-opus-4-6" ,
-        "Qwen/Qwen3-8B" , 
-        "Qwen/Qwen3-4B-Thinking-2507",
-        "mistralai/Mistral-7B-Instruct-v0.3",
-        "anthropic/claude-opus-4-5", 
-        "openai/gpt-oss-20b" ,
-        "meta-llama/Meta-Llama-3.1-8B-Instruct"
-    ]
+    # 2. Call Mistral API
+    model = "mistral-large-latest"
 
-    if not BYTEZ_API_KEY:
-        return "⚠️ Bytez API Key Missing"
+    if not MISTRAL_API_KEY or MISTRAL_API_KEY == "YOUR_API_KEY_HERE":
+        return "⚠️ Mistral API Key Missing"
 
-    for model in MODELS:
-        retries = 0
-        max_retries = 3
-        
-        while retries <= max_retries:
-            try:
-                print(f"🤖 Brainstorming {category} with {model} (Attempt {retries+1})...")
-                
-                url = f"https://api.bytez.com/models/v2/{model}"
-                headers = {
-                    "Authorization": BYTEZ_API_KEY,
-                    "Content-Type": "application/json"
-                }
-                
-                payload = {
-                    "messages": [
-                        {
-                            "role": "system", 
-                            "content": "You are a news generation engine. You enable information flow. You do not converse. You do not plan. You only output the final article text." 
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ],
-                    "params": {
-                        "temperature": 0.3 
-                    }
-                }
-
-                # Intense timeout for Deep Research Papers
-                response = requests.post(url, headers=headers, json=payload, timeout=300)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    if "output" in data and data["output"]:
-                        # 1. Extract Main Content
-                        raw_output = data["output"]["content"]
-                        
-                        # 2. Apply Strip Logic (Safety Net)
-                        return strip_thinking(raw_output)
-                    else:
-                        print(f"  > Empty output from {model}. Moving to next model...")
-                        break 
-
-                elif response.status_code == 429:
-                    print("  > Rate limited (429). Sleeping 60s before retry...")
-                    time.sleep(60)
-                    retries += 1
-                    continue 
-
-                else:
-                    print(f"  > Error from {model} ({response.status_code}): {response.text}")
-                    break 
-
-            except Exception as e:
-                print(f"  > Exception with {model}: {e}")
-                break 
+    retries = 0
+    max_retries = 3
+    
+    while retries <= max_retries:
+        try:
+            print(f"🤖 Brainstorming {category} with {model} (Attempt {retries+1})...")
             
-        print("  > Triggering Fallback to next model...")
+            url = "https://api.mistral.ai/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {MISTRAL_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": model,
+                "messages": [
+                    {
+                        "role": "system", 
+                        "content": "You are a news generation engine. You enable information flow. You do not converse. You do not plan. You only output the final article text." 
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                "temperature": 0.3
+            }
 
-    return "⚠️ Analysis Failed: All models in hierarchy failed to respond."
+            # Intense timeout for Deep Research Papers
+            response = requests.post(url, headers=headers, json=payload, timeout=300)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "choices" in data and len(data["choices"]) > 0:
+                    # 1. Extract Main Content
+                    raw_output = data["choices"][0]["message"]["content"]
+                    
+                    # 2. Apply Strip Logic (Safety Net)
+                    return strip_thinking(raw_output)
+                else:
+                    print(f"  > Empty output from {model}. Retrying...")
+                    retries += 1
+                    continue
+
+            elif response.status_code == 429:
+                print("  > Rate limited (429). Sleeping 60s before retry...")
+                time.sleep(60)
+                retries += 1
+                continue 
+
+            else:
+                print(f"  > Error from {model} ({response.status_code}): {response.text}")
+                break 
+
+        except Exception as e:
+            print(f"  > Exception with {model}: {e}")
+            break 
+            
+    return "⚠️ Analysis Failed: Model failed to respond after retries."
 
 
 def summarize_news(categorized_news):
