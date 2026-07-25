@@ -170,11 +170,3 @@ This repository includes a pre-configured workflow in `.github/workflows/daily_d
 3. The workflow runs automatically at **07:00 UTC** (12:00 PM Pakistan Time).
 
 
-
-<div align="center">
-
-Made with ❤️ and ☕ by **Muhammad Anas Rehman**
-
-Created with the help of **Google Antigravity**
-
-</div>
